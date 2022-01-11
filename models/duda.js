@@ -4,13 +4,10 @@ const mongoose = require("mongoose")
 const Schema = mongoose.Schema
 
 const DudaSchema = Schema({
-    id: String,
     titulo: String,
     descripcion: String,
-    puntos: String,
-    tags: String,
-    createdAt: Date,
-    modifiedAt: Date,
+    puntos: Number,
+    tags: [String],
     tipo: {type: String, enum: ["universidad", "trabajo", "tecnología"]},
     comentarios: [
         {
@@ -30,4 +27,4 @@ const DudaSchema = Schema({
     ]
 })
 
-mongoose.model("duda", DudaSchema)
+module.exports = mongoose.model("duda", DudaSchema)

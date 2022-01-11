@@ -4,11 +4,10 @@ const mongoose = require("mongoose")
 const Schema = mongoose.Schema
 
 const EventoSchema = Schema({
-    id: String,
     text: String,
-    startDate: String,
-    endDate: String,
-    allDay: String,
+    startDate: Date,
+    endDate: Date,
+    allDay: Boolean,
 })
 
 module.exports = mongoose.model("evento", EventoSchema)

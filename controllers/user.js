@@ -22,24 +22,26 @@ function signUp (req, res) {
 
 }
 
-// function signIn (req, res){
-//     console.log("POST /api/user")
-//     console.log(req.body)
+const getUserData = (req, res) => {
+  const token = req.headers.authorization.split(' ')[1]
 
-//     User.findOne({documento: req.body.documento}, (err, user) => {
-//         if (err) return res.status(500).send({message: err})
-//         if (user.length == 0) return res.status(404).send({message: "no existe el usuario"})
+  service.decodeToken(token)
+    .then(response => {
         
-//         req.user = user
-//         console.log()
-        
-//         res.status(200).send({
-//             message: "loggeado correcto",
-//             token: service.createToken(user)
-//         })
-//     })
-// }
+        User.findOne({"_id": response}, (err, user) => {
+          if (err) return res.status(500).send({ msg: `Error: ${err}` })
+          if (!user) return res.status(404).send({ msg: `no existe el usuario` })
+          
+          return res.status(200).send({user})
 
+        })
+        
+    })
+    .catch(response => {
+      return res.status(response.status)
+    })
+
+}
 
 const signIn = (req, res) => {
     User.findOne({ documento: req.body.documento }, (err, user) => {
@@ -59,5 +61,6 @@ const signIn = (req, res) => {
 
 module.exports = {
     signUp,
-    signIn
+    signIn,
+    getUserData
 }

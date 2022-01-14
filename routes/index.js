@@ -18,6 +18,8 @@ api.post("/duda", auth, dudaController.createDuda)
 
 api.post('/registrarse', userController.signUp)
 api.post('/login', userController.signIn)
+api.get('/userdata', auth, userController.getUserData)
+
 
 
 module.exports = api

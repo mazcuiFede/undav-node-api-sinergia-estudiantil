@@ -10,7 +10,9 @@ const UsersSchema = Schema({
     nombre: String,
     apellido: String,
     avatarUrl: String,
+    carrera: String,
     signupDate: {type: Date, default: Date.now()},
+    lastSession: {type: Date, default: Date.now()},
     lastLogin: Date,
 })
 

@@ -1,21 +1,24 @@
 "use strict"
 
 const Duda = require('./../models/duda')
+const moment = require('moment')
 
 
-function createDuda (nuevaDuda) {
+function createDuda (req, res) {
     let duda = new Duda()
 
-    duda.titulo = nuevaDuda.titulo
-    duda.descripcion = nuevaDuda.descripcion
+    duda.titulo = req.body.titulo
+    duda.descripcion = req.body.descripcion
     duda.puntos = 0
-    duda.tags = nuevaDuda.tags
-    duda.tipo = nuevaDuda.tipo
+    duda.tags = req.body.tags
+    duda.tipo = req.body.tipo
 
-    duda.save((err, duda) => {
+    console.log("le ponemos la fecha " + duda.createdAt)
+
+    duda.save((err, dudaCreada) => {
         if (err) res.status(500).send({message: "hubo un error al guardar la duda"})
 
-        res.status(201).send({duda})
+        res.status(201).send({duda: dudaCreada})
     })
 }
 

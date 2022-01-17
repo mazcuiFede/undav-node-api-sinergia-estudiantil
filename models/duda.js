@@ -7,6 +7,7 @@ const DudaSchema = Schema({
     titulo: String,
     descripcion: String,
     puntos: Number,
+    createdAt: { type: Date, default: Date.now() },
     tags: [String],
     tipo: {type: String, enum: ["universidad", "trabajo", "tecnología"]},
     comentarios: [

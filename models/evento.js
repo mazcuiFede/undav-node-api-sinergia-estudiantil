@@ -8,7 +8,8 @@ const EventoSchema = Schema({
     startDate: Date,
     endDate: Date,
     allDay: Boolean,
-    description: String
+    description: String,
+    userId: String
 })
 
 module.exports = mongoose.model("evento", EventoSchema)

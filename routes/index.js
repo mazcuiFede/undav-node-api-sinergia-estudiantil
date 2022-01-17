@@ -9,6 +9,7 @@ const api = express.Router()
 
 api.get("/evento", auth, eventoController.getEventos)
 api.post("/evento", auth, eventoController.createEvento)
+api.delete("/evento/:eventoId", auth, eventoController.deleteEvento)
 
 api.get("/duda", auth, dudaController.getDudas)
 api.get("/duda/:id", auth, dudaController.getDudaById)

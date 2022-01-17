@@ -1,6 +1,7 @@
 'use strict'
 
 const mongoose = require('mongoose')
+const moment = require('moment')
 const User = require('../models/user')
 const service = require('../services')
 
@@ -11,12 +12,13 @@ function signUp (req, res) {
         nombre: req.body.nombre,
         apellido: req.body.apellido,
         avatarUrl: req.body.avatarUrl,
-        password: req.body.password
+        password: req.body.password,
+        carrera: req.body.carrera
     })
 
     user.save((err) => {
         if (err) res.status(500).send({message: "ha ocurrido un error"})
-        
+    
         return res.status(201).send({token: service.createToken(user)})
     })
 
@@ -52,8 +54,13 @@ const signIn = (req, res) => {
         if (err) return res.status(500).send({ msg: `Error al ingresar: ${err}` })
         if (!isMatch) return res.status(404).send({ msg: `Error de contraseña: ${req.body.documento}` })
   
+        User.findByIdAndUpdate(user._id, {lastSession: Date.now()}, () => {
+          console.log("fecha actualizada " + Date.now())
+        })
+
         req.user = user
         return res.status(200).send({ msg: 'Te has logueado correctamente', token: service.createToken(user) })
+        
       });
   
     }).select('_id email +password');

@@ -14,6 +14,8 @@ const UsersSchema = Schema({
     signupDate: {type: Date, default: Date.now()},
     lastSession: {type: Date, default: Date.now()},
     lastLogin: Date,
+    solicitudAdministrador: Boolean,
+    administrador: Boolean
 })
 
 UsersSchema.pre('save', function(next) {

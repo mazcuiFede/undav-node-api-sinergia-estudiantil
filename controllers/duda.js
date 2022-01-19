@@ -1,24 +1,50 @@
 "use strict"
 
 const Duda = require('./../models/duda')
-const moment = require('moment')
-
+const service = require('../services')
+const User = require('../models/user')
 
 function createDuda (req, res) {
-    let duda = new Duda()
+    const token = req.headers.authorization.split(' ')[1]
 
-    duda.titulo = req.body.titulo
-    duda.descripcion = req.body.descripcion
-    duda.puntos = 0
-    duda.tags = req.body.tags
-    duda.tipo = req.body.tipo
+    service.decodeToken(token)
+        .then(response => {
 
-    console.log("le ponemos la fecha " + duda.createdAt)
+            User.findOne({"_id": response}, (err, user) => {
+                if (err) return res.status(500).send({ msg: `Error: ${err}` })
+                if (!user) return res.status(404).send({ msg: `no existe el usuario` })
 
-    duda.save((err, dudaCreada) => {
-        if (err) res.status(500).send({message: "hubo un error al guardar la duda"})
+                let duda = new Duda()
 
-        res.status(201).send({duda: dudaCreada})
+                duda.titulo = req.body.titulo
+                duda.descripcion = req.body.descripcion
+                duda.puntos = 0
+                duda.tags = req.body.tags
+                duda.tipo = req.body.tipo
+                duda.user = user
+            
+                duda.save((err, dudaCreada) => {
+                    if (err) res.status(500).send({message: "hubo un error al guardar la duda"})
+            
+                    return res.status(201).send({duda: dudaCreada})
+                })
+
+            })
+        })
+
+    
+}
+
+function deleteDuda(req,res){
+    let id = req.params.dudaId
+
+    Duda.findById(id, (err, dudaEncontrada) => {
+      if (err) res.status(500).send({message: `Error al borrar la duda: ${err}`})
+  
+      dudaEncontrada.remove(err => {
+        if (err) res.status(500).send({message: `Error al borrar la duda: ${err}`})
+        res.status(200).send({message: 'la duda ha sido eliminado'})
+      })
     })
 }
 
@@ -30,7 +56,7 @@ function getDudas (req, res) {
         if (!duda) return res.status(404).send({message: "no hay dudas"})
 
         res.status(200).send({duda})
-    })
+    }).populate('user')
 }
 
 function getDudaByTipo (req, res) {
@@ -79,5 +105,6 @@ module.exports = {
     getDudas,
     getDudaByTipo,
     getDudaById,
-    putDudaComments
+    putDudaComments,
+    deleteDuda
 }

@@ -10,6 +10,7 @@ const DudaSchema = Schema({
     createdAt: { type: Date, default: Date.now() },
     tags: [String],
     tipo: {type: String, enum: ["universidad", "trabajo", "tecnología"]},
+    user: {type: mongoose.Schema.Types.ObjectId, ref:"user"},
     comentarios: [
         {
             userId: String,

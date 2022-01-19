@@ -46,28 +46,76 @@ const getUserData = (req, res) => {
 }
 
 const signIn = (req, res) => {
-    User.findOne({ documento: req.body.documento }, (err, user) => {
-      if (err) return res.status(500).send({ msg: `Error al ingresar: ${err}` })
-      if (!user) return res.status(404).send({ msg: `no existe el usuario: ${req.body.documento}` })
-  
-      return user.comparePassword(req.body.password, (err, isMatch) => {
-        if (err) return res.status(500).send({ msg: `Error al ingresar: ${err}` })
-        if (!isMatch) return res.status(404).send({ msg: `Error de contraseña: ${req.body.documento}` })
-  
-        User.findByIdAndUpdate(user._id, {lastSession: Date.now()}, () => {
-          console.log("fecha actualizada " + Date.now())
-        })
+  User.findOne({ documento: req.body.documento }, (err, user) => {
+    if (err) return res.status(500).send({ msg: `Error al ingresar: ${err}` })
+    if (!user) return res.status(404).send({ msg: `no existe el usuario: ${req.body.documento}` })
 
-        req.user = user
-        return res.status(200).send({ msg: 'Te has logueado correctamente', token: service.createToken(user) })
-        
-      });
-  
-    }).select('_id email +password');
-  }
+    return user.comparePassword(req.body.password, (err, isMatch) => {
+      if (err) return res.status(500).send({ msg: `Error al ingresar: ${err}` })
+      if (!isMatch) return res.status(404).send({ msg: `Error de contraseña: ${req.body.documento}` })
+
+      User.findByIdAndUpdate(user._id, {lastSession: Date.now()}, () => {
+        console.log("fecha actualizada " + Date.now())
+      })
+
+      req.user = user
+      return res.status(200).send({ msg: 'Te has logueado correctamente', token: service.createToken(user) })
+      
+    });
+
+  }).select('_id email +password');
+}
+
+
+const signInAdmin = (req, res) => {
+  User.findOne({ documento: req.body.documento, administrador: true }, (err, user) => {
+    if (err) return res.status(500).send({ msg: `Error al ingresar: ${err}` })
+    if (!user) return res.status(404).send({ msg: `no existe el usuario: ${req.body.documento}` })
+
+    return user.comparePassword(req.body.password, (err, isMatch) => {
+      if (err) return res.status(500).send({ msg: `Error al ingresar: ${err}` })
+      if (!isMatch) return res.status(404).send({ msg: `Error de contraseña: ${req.body.documento}` })
+
+      User.findByIdAndUpdate(user._id, {lastSession: Date.now()}, () => {
+        console.log("fecha actualizada " + Date.now())
+      })
+
+      req.user = user
+      return res.status(200).send({ msg: 'Te has logueado correctamente', token: service.createToken(user) })
+      
+    });
+
+  }).select('_id email +password');
+}
+
+const updateUser = (res, req) => {
+  let id = req.params.id
+  let body = req.body
+
+  User.findByIdAndUpdate(id, body, (err, user) => {
+    if (err) res.status(500).send({message: "hubo un error al actualizar el usuario"})
+    
+    res.status(200).send({user})
+  })
+
+}
+
+const getAdminPostulados = (res, req) => {
+    console.log("GET /api/getAdminPostulados")
+    
+    User.find({solicitudAdministrador: true}, (err, user) => {
+        if (err) res.status(500).send({message: "hubo un error al obtener los administradores"})
+        if (!user) return res.status(404).send({message: "no hay dudas"})
+
+        res.status(200).send({user})
+    })
+}
 
 module.exports = {
     signUp,
     signIn,
-    getUserData
+    getUserData,
+    signInAdmin,
+    updateUser,
+    getAdminPostulados
 }

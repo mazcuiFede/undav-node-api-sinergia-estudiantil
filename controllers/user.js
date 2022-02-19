@@ -13,7 +13,8 @@ function signUp (req, res) {
         apellido: req.body.apellido,
         avatarUrl: req.body.avatarUrl,
         password: req.body.password,
-        carrera: req.body.carrera
+        carrera: req.body.carrera,
+        status: req.body.status
     })
 
     user.save((err) => {
@@ -66,7 +67,6 @@ const signIn = (req, res) => {
   }).select('_id email +password');
 }
 
-
 const signInAdmin = (req, res) => {
   User.findOne({ documento: req.body.documento, administrador: true }, (err, user) => {
     if (err) return res.status(500).send({ msg: `Error al ingresar: ${err}` })
@@ -88,15 +88,26 @@ const signInAdmin = (req, res) => {
   }).select('_id email +password');
 }
 
-const updateUser = (res, req) => {
-  let id = req.params.id
-  let body = req.body
+function putUserStatus (req, res) {
 
-  User.findByIdAndUpdate(id, body, (err, user) => {
-    if (err) res.status(500).send({message: "hubo un error al actualizar el usuario"})
-    
-    res.status(200).send({user})
-  })
+  let status = req.body
+
+  const token = req.headers.authorization.split(' ')[1]
+
+  service.decodeToken(token)
+    .then(response => {
+     
+        User.findByIdAndUpdate({"_id": response}, status, (err, user) => {
+          if (err) res.status(500).send({message: "hubo un error al actualizar el usuario"})
+       
+          res.status(200).send({user})
+        })
+     
+    })
+    .catch(response => {
+      return res.status(response.status)
+    })
+
 
 }
 
@@ -116,6 +127,6 @@ module.exports = {
     signIn,
     getUserData,
     signInAdmin,
-    updateUser,
+    putUserStatus,
     getAdminPostulados
 }

@@ -12,7 +12,6 @@ function isAuth (req, res, next) {
 
   services.decodeToken(token)
     .then(response => {
-        console.log(token)
       req.user = response
       next()
     })

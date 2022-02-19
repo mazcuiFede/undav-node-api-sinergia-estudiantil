@@ -14,7 +14,7 @@ const UsersSchema = Schema({
     signupDate: {type: Date, default: Date.now()},
     lastSession: {type: Date, default: Date.now()},
     lastLogin: Date,
-    solicitudAdministrador: Boolean,
+    status: {type: String, enum: ["activo", "inactivo", "admin", "postulado"]},
     administrador: Boolean
 })
 

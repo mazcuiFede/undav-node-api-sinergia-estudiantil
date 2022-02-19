@@ -23,6 +23,6 @@ api.post('/login', userController.signIn)
 api.post('/loginadmin', userController.signInAdmin)
 api.get('/user', auth, userController.getUserData)
 api.get('/useradmin', auth, userController.getAdminPostulados)
-api.put('/user', auth, userController.updateUser)
+api.put('/user', auth, userController.putUserStatus)
 
 module.exports = api

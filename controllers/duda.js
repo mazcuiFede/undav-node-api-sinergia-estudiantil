@@ -23,10 +23,13 @@ function createDuda (req, res) {
                 duda.tipo = req.body.tipo
                 duda.user = user
             
-                duda.save((err, dudaCreada) => {
+                console.log("el tipo es " + req.body.tipo)
+
+                duda.save((err, duda) => {
+                    console.log(duda)
                     if (err) res.status(500).send({message: "hubo un error al guardar la duda"})
             
-                    return res.status(201).send({duda: dudaCreada})
+                    return res.status(201).send({duda})
                 })
 
             })
@@ -60,7 +63,7 @@ function getDudas (req, res) {
 }
 
 function getDudaByTipo (req, res) {
-        console.log("GET /api/duda/:tipo")
+        console.log("GET /api/duda/:tipo " + req.params.tipo)
         
         let tipo = req.params.tipo
     

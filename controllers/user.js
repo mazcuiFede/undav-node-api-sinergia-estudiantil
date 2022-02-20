@@ -86,24 +86,36 @@ const signIn = (req, res) => {
 const signInAdmin = (req, res) => {
   console.log("GET /api/loginadmin")
 
-  User.findOne({ documento: req.body.documento, status: "admin" }, (err, user) => {
+  User.findOne({ documento: req.body.documento }, (err, user) => {
+    
     if (err) return res.status(500).send({ msg: `Error al ingresar: ${err}` })
     if (!user) return res.status(404).send({ msg: `no existe el usuario: ${req.body.documento}` })
+    if (user.status !== "admin") return res.status(404).send({ msg: `Tu usuario está desactivado. Contactá a un administrador.` })
 
-    return user.comparePassword(req.body.password, (err, isMatch) => {
+    
+    User.findOne({ documento: req.body.documento }, (err, user) => {
+    
       if (err) return res.status(500).send({ msg: `Error al ingresar: ${err}` })
-      if (!isMatch) return res.status(404).send({ msg: `Error de contraseña: ${req.body.documento}` })
+      if (!user) return res.status(404).send({ msg: `no existe el usuario: ${req.body.documento}` })
+  
+  
+      return user.comparePassword(req.body.password, (err, isMatch) => {
+        
+        if (err) return res.status(500).send({ msg: `Error al ingresar: ${err}` })
+        if (!isMatch) return res.status(404).send({ msg: `Error de contraseña: ${req.body.documento}` })
+        
+        User.findByIdAndUpdate(user._id, {lastSession: Date.now()}, () => {
+          console.log("fecha actualizada " + Date.now())
+        })
+  
+        req.user = user
+        return res.status(200).send({ msg: 'Te has logueado correctamente', token: service.createToken(user) })
+        
+      });
+  
+    }).select('_id email +password');;
 
-      User.findByIdAndUpdate(user._id, {lastSession: Date.now()}, () => {
-        console.log("fecha actualizada " + Date.now())
-      })
-
-      req.user = user
-      return res.status(200).send({ msg: 'Te has logueado correctamente', token: service.createToken(user) })
-      
-    });
-
-  }).select('_id email +password');
+  })
 }
 
 function putUserStatus (req, res) {

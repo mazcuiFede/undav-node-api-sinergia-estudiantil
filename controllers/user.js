@@ -47,28 +47,46 @@ const getUserData = (req, res) => {
 }
 
 const signIn = (req, res) => {
+  console.log("GET /api/login")
+
   User.findOne({ documento: req.body.documento }, (err, user) => {
+    
     if (err) return res.status(500).send({ msg: `Error al ingresar: ${err}` })
     if (!user) return res.status(404).send({ msg: `no existe el usuario: ${req.body.documento}` })
+    if (user.status === "inactivo") return res.status(404).send({ msg: `Tu usuario está desactivado. Contactá a un administrador.` })
 
-    return user.comparePassword(req.body.password, (err, isMatch) => {
+    
+    User.findOne({ documento: req.body.documento }, (err, user) => {
+    
       if (err) return res.status(500).send({ msg: `Error al ingresar: ${err}` })
-      if (!isMatch) return res.status(404).send({ msg: `Error de contraseña: ${req.body.documento}` })
+      if (!user) return res.status(404).send({ msg: `no existe el usuario: ${req.body.documento}` })
+  
+  
+      return user.comparePassword(req.body.password, (err, isMatch) => {
+        
+        if (err) return res.status(500).send({ msg: `Error al ingresar: ${err}` })
+        if (!isMatch) return res.status(404).send({ msg: `Error de contraseña: ${req.body.documento}` })
+        
+        User.findByIdAndUpdate(user._id, {lastSession: Date.now()}, () => {
+          console.log("fecha actualizada " + Date.now())
+        })
+  
+        req.user = user
+        return res.status(200).send({ msg: 'Te has logueado correctamente', token: service.createToken(user) })
+        
+      });
+  
+    }).select('_id email +password');;
 
-      User.findByIdAndUpdate(user._id, {lastSession: Date.now()}, () => {
-        console.log("fecha actualizada " + Date.now())
-      })
+  })
 
-      req.user = user
-      return res.status(200).send({ msg: 'Te has logueado correctamente', token: service.createToken(user) })
-      
-    });
-
-  }).select('_id email +password');
+  
 }
 
 const signInAdmin = (req, res) => {
-  User.findOne({ documento: req.body.documento, administrador: true }, (err, user) => {
+  console.log("GET /api/loginadmin")
+
+  User.findOne({ documento: req.body.documento, status: "admin" }, (err, user) => {
     if (err) return res.status(500).send({ msg: `Error al ingresar: ${err}` })
     if (!user) return res.status(404).send({ msg: `no existe el usuario: ${req.body.documento}` })
 
@@ -110,13 +128,24 @@ function putUserStatus (req, res) {
 
 
 }
+function putUserStatusAdmin (req, res) {
 
-const getAdminPostulados = (res, req) => {
-    console.log("GET /api/getAdminPostulados")
+  let status = req.body
+
+  User.findByIdAndUpdate({"_id": req.params.id}, status, (err, user) => {
+      if (err) res.status(500).send({message: "hubo un error al actualizar el usuario"})
     
-    User.find({solicitudAdministrador: true}, (err, user) => {
+      res.status(200).send({user})
+    })
+
+}
+
+const getUsers = (req, res) => {
+    console.log("GET /api/users")
+    
+    User.find({}, (err, user) => {
         if (err) res.status(500).send({message: "hubo un error al obtener los administradores"})
-        if (!user) return res.status(404).send({message: "no hay dudas"})
+        if (!user) return res.status(404).send({message: "no hay users"})
 
         res.status(200).send({user})
     })
@@ -128,5 +157,6 @@ module.exports = {
     getUserData,
     signInAdmin,
     putUserStatus,
-    getAdminPostulados
+    putUserStatusAdmin,
+    getUsers
 }
